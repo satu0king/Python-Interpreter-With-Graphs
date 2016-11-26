@@ -95,6 +95,10 @@ class Eval:
 
                 #Pushing ans back to stack
                 evalStack.append(ans)
+
+        # print evalStack
+        if len(evalStack) != 1:
+            raise Exception('Invalid Syntax')
         return evalStack.pop()
 
     def compute(self,op,op1,op2=None):
@@ -113,6 +117,9 @@ class Eval:
             return op1 ** op2
         if op=='-':
             return op1 - op2
+        if op == '%':
+            return op1 % op2
+        else :raise(str(op)+' is not defined')
 
 #TESTING CODE - START
 if __name__=='__main__':

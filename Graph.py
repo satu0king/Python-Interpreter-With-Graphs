@@ -1,10 +1,17 @@
 from Tkinter import *
 import Evaluation
+import random
 # This Module consists of a standalone graph class. Each object has a functionList and plots the functions.
 # The Graph class inherits from canvas class
 # The Graph class has helper functions like pane and zoom. This class automatically updates the functions when required.
 # Evaluation module is imported to evaluate expressions which are needed for plotting
 
+
+def drange(start, stop, step):
+     r = start
+     while r < stop:
+         yield r
+         r += step
 # GRAPH CLASS -START
 class Graph_class(Canvas):
     def __init__(self,master,bg,width,height,scale=30.0,varDict=dict()):
@@ -14,7 +21,7 @@ class Graph_class(Canvas):
         self.evaluator = Evaluation.Eval(varDict=varDict) # Creation of evaluator object, sending variable dictionary as reference
         self.evaluate = self.evaluator.evaluate # Obtaining the function
         self.fnList=[] # List of functions to be plotted
-
+        self.fnColors={}
         self.xrange=width #Range of x axis
         self.yrange=height #Range of y axis
 
@@ -33,20 +40,24 @@ class Graph_class(Canvas):
     def plotAxis(self):
 
         #Numbers on y Axis
-        for i in range(1,int(self.y_offset/self.scale)+1): #Positive
-            self.create_text(self.x_offset-5, self.y_offset-i*self.scale, text=str(i))
-        for i in range(1,int((self.yrange-self.y_offset)/self.scale)+1):#negative
-            self.create_text(self.x_offset+5, self.y_offset+i*self.scale, text=str(-i))
+        step=int(max(1,30/self.scale))
+        if self.scale>60:
+            step = max(0.1,int(10*40 / self.scale)/10.0)
+
+        for i in drange(step,int(self.y_offset/self.scale)+1,step): #Positive
+            self.create_text(self.x_offset-10, self.y_offset-i*self.scale, text=str(i),fill='blue')
+        for i in drange(step,int((self.yrange-self.y_offset)/self.scale)+1,step):#negative
+            self.create_text(self.x_offset+10, self.y_offset+i*self.scale, text=str(-i),fill='blue')
 
         #Numbers on x axis
-        for i in range(1,int(self.x_offset/self.scale)+1):#negative
-            self.create_text(self.x_offset-i*self.scale,self.y_offset+6, text=str(-i))
-        for i in range(1,int((self.xrange-self.x_offset)/self.scale)+1): #positive
-            self.create_text(self.x_offset+i*self.scale, self.y_offset-6, text=str(i))
+        for i in drange(step,int(self.x_offset/self.scale)+1,step):#negative
+            self.create_text(self.x_offset-i*self.scale,self.y_offset+12, text=str(-i),fill='blue')
+        for i in drange(step,int((self.xrange-self.x_offset)/self.scale)+1,step): #positive
+            self.create_text(self.x_offset+i*self.scale, self.y_offset-12, text=str(i),fill='blue')
 
         #Axis
-        self.create_line(self.x_offset,0,self.x_offset,self.yrange)
-        self.create_line(0,self.y_offset,self.xrange,self.y_offset)
+        self.create_line(self.x_offset,0,self.x_offset,self.yrange,fill='red',width=2)
+        self.create_line(0,self.y_offset,self.xrange,self.y_offset,fill='red',width=2)
     def Clear(self):
         self.delete("all")
         self.plotAxis()
@@ -80,8 +91,12 @@ class Graph_class(Canvas):
     def Plot(self):
         #This fn plots all fns in function List
         self.Clear()
-        for fn in self.fnList:
-            self.PlotFn(fn)
+        for fn in self.fnList[::]:
+            try:
+                self.PlotFn(fn)
+            except Exception:
+                self.fnList.remove(fn)
+
     def addFn(self,Fn):
         #Checks if Fn is already present
         if Fn in self.fnList:
@@ -89,6 +104,8 @@ class Graph_class(Canvas):
 
         #Checks if fn is plottable
         try:
+            color = '#' + str(hex(random.randint(0, int(0xCC))))[2:].rjust(2, '0') + str(hex(random.randint(0, int(0xCC))))[2:].rjust(2, '0') + str(hex(random.randint(0, int(0x99))))[2:].rjust(2, '0')
+            self.fnColors[Fn]=color
             self.PlotFn(Fn)
             #adds fn if successful
             self.fnList.append(Fn)
@@ -126,7 +143,7 @@ class Graph_class(Canvas):
         x1=lower_x
         self.varDict['x']=x1 #Substitute for x
         y1=self.evaluate(fn) #Find y
-
+        color =self.fnColors[fn]  #'#' + str(hex(random.randint(0, int(0x111111)))[2:]
         #Go until Higher Limit
         while x2<=higher_x:
             x2+=delta
@@ -137,7 +154,8 @@ class Graph_class(Canvas):
                pass
             else:
                 #Join Points
-                self.create_line(scale*(x1)+x_offset,scale*(y1)+y_offset,scale*(x2)+x_offset,scale*(y2)+y_offset)
+
+                self.create_line(scale*(x1)+x_offset,scale*(y1)+y_offset,scale*(x2)+x_offset,scale*(y2)+y_offset,fill=color)
             x1=x2
             y1=y2
 # GRAPH CLASS -END

@@ -1,5 +1,9 @@
 from Tkinter import *
 
+# This Module is from
+# http://code.activestate.com/recipes/52266-multilistbox-tkinter-widget/
+# http://code.activestate.com/recipes/users/98036/
+# Brent Burley
 
 class MultiListbox(Frame):
     def __init__(self, master, lists):

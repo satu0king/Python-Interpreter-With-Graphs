@@ -22,6 +22,7 @@ class Interpreter:
         #Standard NameSpace rules
 
         if varName=='x' or varName=='y':
+            raise NameError("NameSpace " + varName + " is reserved for Plots")
             return False
 
         if len(varName)==0:
@@ -30,9 +31,11 @@ class Interpreter:
         allowed="1234567890_qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM"
         for i in varName:
             if i not in allowed:
+                raise NameError("Invalid Namespace: '"+i+"' Is a special character")
                 return False
 
         if varName[0].isdigit():
+            raise NameError('Invalid Namespace: Cannot start with a digit')
             return False
 
         return True
@@ -49,7 +52,7 @@ class Interpreter:
     def interpret(self,inp):
         #This function interprets the input
 
-        if inp=='exit':
+        if inp=='exit()':
             sys.exit()
         #Splits by '='
         inp=[ s.strip () for s in inp.split('=') ]
@@ -74,7 +77,7 @@ class Interpreter:
         #Checking if all variables to be assigned have valid names
         for varName in inp[:-1]:
             if not Interpreter.isValidNameSpace(varName):
-                raise NameError('INVALID VARIABLE NAME: '+ varName)
+                raise NameError('Invalid Namespace: '+ varName)
 
         #Defining Variables and giving value
         value=self.evaluate(inp[-1])
@@ -88,7 +91,7 @@ if __name__=='__main__':
     obj = Interpreter()
     while True:
         try:
-            status,output= obj.interpret(raw_input())
+            status,output= obj.interpret(raw_input('>>> '))
             if output != None:
                 print output
         except NameError as e:
